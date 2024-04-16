@@ -1,0 +1,87 @@
+---
+title: "Gold Prices"
+author: "Pranit Brahmbhatt"
+date: "2024-04-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+
+# Load the dataset
+data <- read.csv("gold.csv")  # Replace "your_dataset.csv" with the actual file path
+
+# Check the structure of the dataset
+str(data)
+
+# Check for missing values
+missing_values <- sapply(data, function(x) sum(is.na(x)))
+print(missing_values)
+
+# Handle missing values (if any)
+# For example, you can remove rows with missing values
+data <- na.omit(data)
+
+# Convert Price, Open, High, Low, and Vol. columns to numeric
+data$Price <- as.numeric(gsub(",", "", data$Price))
+data$Open <- as.numeric(gsub(",", "", data$Open))
+data$High <- as.numeric(gsub(",", "", data$High))
+data$Low <- as.numeric(gsub(",", "", data$Low))
+data$Vol. <- as.numeric(gsub("K", "", data$Vol.)) * ifelse(grepl("K", data$Vol.), 1000, 1)
+
+# Convert Change.. column to numeric after removing the "%" sign
+data$Change.. <- as.numeric(gsub("%", "", data$Change..))
+
+# Create a data frame with the cleaned data
+cleaned_data <- as.data.frame(data)
+```
+```{r}
+
+str(cleaned_data)
+
+```
+```{r}
+cleaned_df <- df[complete.cases(df), ]
+print(cleaned_data)
+```
+
+```{r}
+
+
+# Convert Date column to Date format
+cleaned_data$Date <- as.Date(cleaned_data$Date, format = "%m/%d/%Y")
+
+# Extract month and year
+cleaned_data$Month <- format(cleaned_data$Date, "%Y-%m")
+
+# Aggregate data by month
+aggregated_df <- cleaned_data %>%
+  group_by(Month) %>%
+  summarise(
+    Avg_Price = mean(Price, na.rm = TRUE),
+    Avg_Open = mean(Open, na.rm = TRUE),
+    Avg_High = mean(High, na.rm = TRUE),
+    Avg_Low = mean(Low, na.rm = TRUE),
+    Avg_Vol = mean(Vol., na.rm = TRUE),
+    Avg_Change = mean(Change.., na.rm = TRUE)
+  ) %>%
+  arrange(Month)
+
+# Show the first few rows of aggregated dataframe
+head(aggregated_df)
+
+
+```
+
+
